@@ -21,7 +21,7 @@ export const actions = {
   fetchAllProfiles({ commit }) {
     ProfileService.getAllProfiles()
       .then(response => {
-        commit("SET_ALL_PROFILES", response.data.records);
+        commit("SET_ALL_PROFILES", response.data);
       })
       .catch(error => {
         console.log("There was an error:" + error.message);
