@@ -2,25 +2,20 @@
   <div>
     <div class="profile__container">
       <div class="profile__image">
-        <img
-          :src="
-            profile['fields']['Фотография'][0]['thumbnails']['large']['url']
-          "
-          alt="Фотография"
-        />
+        <img :src="profile.photo" alt="Фотография" />
       </div>
       <div class="profile__body">
         <div class="profile__name">
-          ФИО: <span class="name__span">{{ profile["fields"]["Имя"] }}</span>
+          ФИО: <span class="name__span">{{ profile.name }}</span>
         </div>
         <h4 class="methods__header">Методы:</h4>
         <div class="profile__methods">
           <div
             class="method"
-            v-for="method in profile['fields']['Методы']"
+            v-for="method in profile.methods.split(',')"
             :key="method"
           >
-            {{ method }}
+            {{ method | methodFilter }}
           </div>
         </div>
       </div>
@@ -42,6 +37,11 @@ export default {
     ...mapState({
       profile: state => state.profile.profile
     })
+  },
+  filters: {
+    methodFilter: value => {
+      return value.replace(/[[\]"']/g, "");
+    }
   }
 };
 </script>

@@ -5,15 +5,10 @@
   >
     <div class="profile__card">
       <div class="card__img">
-        <img
-          :src="
-            profile['fields']['Фотография'][0]['thumbnails']['small']['url']
-          "
-          alt="card photo"
-        />
+        <img :src="profile.photo" alt="card photo" />
       </div>
       <div class="card__body">
-        {{ profile["fields"]["Имя"] }}
+        {{ profile.name }}
       </div>
     </div>
   </router-link>
@@ -51,6 +46,15 @@ export default {
   margin: 12px auto;
 }
 
+/* Card */
+.card__img {
+  height: 70px;
+  width: 50px;
+}
+img {
+  max-width: 100%;
+  max-height: 100%;
+}
 .card__body {
   flex-grow: 1;
 }
