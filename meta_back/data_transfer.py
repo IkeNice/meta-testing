@@ -1,8 +1,23 @@
+import sys
+import os
+import django
+
 import airtable
 import datetime
 import time
 
 import psycopg2
+
+# Turn off bytecode generation
+sys.dont_write_bytecode = True
+
+# Django specific settings
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'SetupDjangoORM.SetupDjangoORM')
+django.setup()
+
+# Import models for use in script
+from therapist_profile.models import Profile
+
 
 APP_ID = 'appbssvSnF3Oq5dgI'
 APP_KEY = 'key2opSCUNgWPJ6x0'
@@ -41,37 +56,48 @@ def convert_airtable_data(raw_data):
     return converted_output
 
 
+def get_data_from_postgres():
+    """ Get data from PostgreSQL and convert into tuple """
+    data = Profile.objects.all()
+    old_data = []
+    for row in data:
+        old_profile_info = (row.id, row.name, row.methods, row.photo)
+        old_data.append(old_profile_info)
+    return old_data
+
+
 def get_changes():
     """
         Compare data from PostgreSQL with data from Airtable.
         If changes detected, then handle it
     """
-    # data from postgresql
-    cur, conn = db_connection()
-    cur.execute("select * from therapist_profile_profile")
-    old_data = cur.fetchall()
+    # fetch data from postgresql
+    old_data = get_data_from_postgres()
 
-    # data from Airtable
+    # fetch data from Airtable
     raw_data = get_data_from_airtable(APP_ID, APP_KEY, TABLE)
     new_data = convert_airtable_data(raw_data)
+
     old_data_id = []
     new_data_id = []
+
     for i in range(len(old_data)):
         old_data_id.append(old_data[i][0])
     for i in range(len(new_data)):
         new_data_id.append(new_data[i][0])
+
     # Get difference between old and new data
     diff = list(set(old_data) - set(new_data)) + list(set(new_data) - set(old_data))
     if diff:
         for row in diff:
             if not(row[0] in old_data_id):
-                print(row[0], "not in old data, inserting it")
+                print(row[1], "not in old data, inserting it")
                 insert_in_db(row)
             elif not(row[0] in new_data_id):
-                print(row[0], "not in new data, deleting it")
+                print(row[1], "not in new data, deleting it")
                 delete_from_db(row)
             else:
-                print(row, "in both data, updating it")
+                print(row[1], "in both data, updating it")
                 update_db_row(row)
     else:
         print('there is no difference')
@@ -79,56 +105,20 @@ def get_changes():
 
 def insert_in_db(data):
     """ Insert data in table therapist_profile_profile in PostgreSQL """
-    try:
-        cur, conn = db_connection()
-
-        insert_query = "insert into therapist_profile_profile(id, name, methods, photo) values (" + \
-                       str(data[0]) + ", '" + data[1] + "', '" + data[2] + "', '" + data[3] + "');"
-        cur.execute(insert_query)
-        conn.commit()
-
-        cur.close()
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-    finally:
-        if conn is not None:
-            conn.close()
+    profile = Profile(id=data[0], name=data[1], methods=data[2], photo=data[3])
+    profile.save()
 
 
 def delete_from_db(data):
     """ Delete data from table therapist_profile_profile in PostgreSQL """
-    try:
-        cur, conn = db_connection()
-
-        delete_query = "delete from therapist_profile_profile where id=" + str(data[0])
-        cur.execute(delete_query)
-        conn.commit()
-
-        cur.close()
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-    finally:
-        if conn is not None:
-            conn.close()
+    profile = Profile.objects.get(id=data[0])
+    profile.delete()
 
 
 def update_db_row(data):
     """ Update data in table therapist_profile_profile in PostgreSQL """
-    try:
-        cur, conn = db_connection()
-
-        update_query = "update therapist_profile_profile " + \
-                       " set name='" + data[1] + "', methods='" + data[2] + "', photo='" + data[3] + "'" + \
-                       "where id=" + str(data[0])
-        cur.execute(update_query)
-        conn.commit()
-
-        cur.close()
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-    finally:
-        if conn is not None:
-            conn.close()
+    profile = Profile.objects.get(id=data[0])
+    Profile.objects.filter(id=profile.id).update(name=data[1], methods=data[2], photo=data[3])
 
 
 def create_new_table():
