@@ -1,0 +1,8 @@
+#  Copy your Airtable ID of your table set in APP_ID
+APP_ID = ''
+# Copy your Airtable profile unique API key and set in APP_KEY
+APP_KEY = ''
+# Copy name of your table an set in TABLE
+TABLE = ''
+# Set your dbname, user, password instead {}
+DB_SETUP = "dbname={} user={} password={}"
