@@ -18,18 +18,20 @@ django.setup()
 # Import models for use in script
 from therapist_profile.models import Profile
 
-# TODO: change this to your own values
-APP_ID = 'appbssvSnF3Oq5dgI'
-APP_KEY = 'key2opSCUNgWPJ6x0'
-TABLE = 'Psychotherapists'
+try:
+    import db_config as conf
+except ImportError:
+    exit('DO: copy db_config.py.default in db_config.py and set token')
+
+APP_ID = conf.APP_ID
+APP_KEY = conf.APP_KEY
+TABLE = conf.TABLE
 AIRTABLE_URL = 'https://api.airtable.com/v0/' + APP_ID
 
 
 def db_connection():
-    # TODO: change it to your information
-    db_setup = "dbname=therapists user=postgres password=admin"
     """ Set up the connection to PostgreSQL """
-    postgres_connection = psycopg2.connect(db_setup)
+    postgres_connection = psycopg2.connect(conf.DB_SETUP)
     cursor = postgres_connection.cursor()
     return cursor, postgres_connection
 
