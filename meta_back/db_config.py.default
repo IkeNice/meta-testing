@@ -4,5 +4,5 @@ APP_ID = ''
 APP_KEY = ''
 # Copy name of your table an set in TABLE
 TABLE = ''
-# Set your dbname, user, password instead {}
+# Set your PostgreSQL dbname, user, password instead {} 
 DB_SETUP = "dbname={} user={} password={}"
