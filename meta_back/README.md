@@ -19,6 +19,13 @@ py manage.py runserver
 ```
 
 # Run `data_transfer.py` in Command Line:
+First, you need to set up db_config.py file:
+  - create db_config.py
+  - open db_config.py.default and copy whole file
+  - paste it in your db_config.py
+  - set your own information
+
+After that in Command Line:
 ```python
 py data_transfer.py
 ```
